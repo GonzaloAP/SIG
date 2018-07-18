@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         setContentView(R.layout.activity_main);
         iniciarVariable();
 
-        /*Para obtener la velocidad*//*
+        /*Para obtener la velocidad*/
         LocationManager lm = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -51,12 +51,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             return;
         }
 
-        *//*Traer las Actualizciones del GPS*//*
+        /*Traer las Actualizciones del GPS*/
         lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-        *//*Inicializar en null*//*
+        /*Inicializar en null*/
         onLocationChanged(null);
 
-        *//*Para obtener la velocidad*/
+        /*Para obtener la velocidad*/
 
         Button btn_iniciar_captura=(Button) findViewById(R.id.btn_iniciar_captura);
         btn_iniciar_captura.setOnClickListener(new View.OnClickListener() {
@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     public void onLocationChanged(Location location) {
         float v = this.getVelocidad(location);
         /*Solo para fines de prueba, comenten el edittxtplaca*/
-        edittxtplaca.setText(v + " km/h ");
+        //edittxtplaca.setText(v + " km/h ");
     }
 
     public float getVelocidad(Location location){

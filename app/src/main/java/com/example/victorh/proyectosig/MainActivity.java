@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
 import org.ksoap2.SoapEnvelope;
@@ -30,6 +31,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private SoapPrimitive resultRequest;
     private String mensaje;
     private final String TAG="main_act";
+    private String salidaRetorno;
+    private RadioButton rbsalida,rbretorno;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,15 +85,19 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         linea=edittxtlinea.getText().toString();
         placa=edittxtplaca.getText().toString();
         usuario=edittxtusuario.getText().toString();
+
+        if (rbsalida.isChecked()) salidaRetorno= VarConst.RECORRIDO_SALIDA;
+        if (rbretorno.isChecked()) salidaRetorno= VarConst.RECORRIDO_RETORNO;
+
     }
 
     private void obtenerOtrosDatos() {
-        liTipo="1";
+        liTipo=VarConst.ACTIVIDAD_INICIADA;
         lsFech="2018-07-18";
         lsHora="10:47:00";
         lfLogi="-17.810194";
         lfLati="-63.182730";
-        liReco="1";
+        liReco=salidaRetorno;
     }
 
     /**
@@ -100,6 +107,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         edittxtusuario=(EditText) findViewById(R.id.edittxt_usuario);
         edittxtplaca=(EditText) findViewById(R.id.edittxt_placa);
         edittxtlinea=(EditText) findViewById(R.id.edittxt_linea);
+
+        rbsalida=(RadioButton)findViewById(R.id.rb_salida);
+        rbretorno=(RadioButton)findViewById(R.id.rb_retorno);
+
 
     }
 

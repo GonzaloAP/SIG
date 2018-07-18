@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     public void onLocationChanged(Location location) {
         float v = this.getVelocidad(location);
+        /*Solo para fines de prueba, comenten el edittxtplaca*/
         edittxtplaca.setText(v + " km/h ");
     }
 

@@ -25,6 +25,8 @@ public class Funciones_auxiliares {
         Date anotherCurDate = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
         String formattedDateString = formatter.format(anotherCurDate);
+
+        formattedDateString= formattedDateString.replace("/","-");
         return formattedDateString;
     }
 

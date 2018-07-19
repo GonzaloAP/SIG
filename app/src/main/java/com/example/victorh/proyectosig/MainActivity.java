@@ -39,23 +39,17 @@ public class MainActivity extends AppCompatActivity {
     private String linea, placa, usuario;
     private String liTipo, lsFech, lsHora, lfLogi, lfLati, liReco;
     private SoapPrimitive resultRequest;
-    private String mensaje;
-
     private final String TAG="main_act";
     private String salidaRetorno;
     private RadioButton rbsalida,rbretorno;
-
-    private String fecha = Funciones_auxiliares.getFecha();
-    private String hora = Funciones_auxiliares.getHora();
     public static float velocidad;
     public static double latitud, longitud;
-
-
-
+    private Actividad actividadActual;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        actividadActual=null;
 
         Toast mensajeGPS = Toast.makeText(getApplicationContext(), "Por Favor Active su GPS", Toast.LENGTH_SHORT);
         mensajeGPS.setGravity(Gravity.CENTER,0,0);
@@ -63,31 +57,14 @@ public class MainActivity extends AppCompatActivity {
 
         iniciarVariable();
 
-        Button btn_iniciar_captura = (Button) findViewById(R.id.btn_iniciar_captura);
-        btn_iniciar_captura.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!campos_vacios()) {
-                    obtenerDatosCampos();
-                    obtenerOtrosDatos();
-                    SegundoPlano segundoPlano = new SegundoPlano();
-                    segundoPlano.execute();
-
-                } else {
-
-                    Toast.makeText(getApplicationContext(), "Algunos campos estan vacios", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION,}, 1000);
         } else {
             ubicacion();
         }
 
-
     }
+
 
 
     private void obtenerDatosCampos() {
@@ -100,22 +77,14 @@ public class MainActivity extends AppCompatActivity {
         if (rbretorno.isChecked()) salidaRetorno= VarConst.RECORRIDO_RETORNO;
 
     }
-
     private void obtenerOtrosDatos() {
-        liTipo=VarConst.ACTIVIDAD_INICIADA;
-        lsFech="2018-07-18";
-        lsHora="10:47:00";
-        lfLogi="-17.810194";
-        lfLati="-63.182730";
-        liReco=salidaRetorno;
+        lsFech=Funciones_auxiliares.getFecha();
+        lsHora=Funciones_auxiliares.getHora();
+        lfLogi=this.longitud+"";
+        lfLati=this.latitud+"";
+        liReco=this.salidaRetorno;
 
     }
-
-
-    /**
-     * Inicia todas las variables que se van a utilizar del layout
-     */
-
     public void iniciarVariable(){
         edittxtusuario=(EditText) findViewById(R.id.edittxt_usuario);
         edittxtplaca=(EditText) findViewById(R.id.edittxt_placa);
@@ -128,80 +97,19 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+    public void iniciarCaptura(View view) {
+        if (!campos_vacios()) {
+            disabledButtonIniciarCaptura();
+            obtenerDatosCampos();
+            obtenerOtrosDatos();
+            TaskAddActividad taskAddActividad = new TaskAddActividad();
+            taskAddActividad.execute();
 
-    /**
-     * Funcion de btn_iniciarCaptura
-     * @param
-     */
-    public void iniciarCaptura() {
-        Intent intent = new Intent(this, Main2Activity.class);
-        startActivity(intent);
-        finish();
-    }
+        } else {
 
-
-    private class SegundoPlano extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            enviarActividad();
-            Log.i(TAG, "Datos enviados: " + linea + "  " + placa + " " + usuario);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            Log.i(TAG, "ResultRequest: " + resultRequest.toString());
-            iniciarCaptura();
-            super.onPostExecute(aVoid);
+            Toast.makeText(getApplicationContext(), "Algunos campos estan vacios", Toast.LENGTH_SHORT).show();
         }
     }
-
-    private void enviarActividad() {
-        String SOAP_ACTION = "http://activebs.net/RTACT_AdicionarActividad";
-        String METHOD_NAME = "RTACT_AdicionarActividad";
-        String NAME_SPACE = "http://activebs.net/";
-        String URL = "http://wslectura.coosiv.com/wsRT.asmx";
-
-        try {
-            SoapObject soapObject = new SoapObject(NAME_SPACE, METHOD_NAME);
-            soapObject.addProperty("liTipo", liTipo);
-            soapObject.addProperty("lsFech", lsFech);
-            soapObject.addProperty("lsHora", lsHora);
-            soapObject.addProperty("lsLine", linea);
-            soapObject.addProperty("lsPlac", placa);
-            soapObject.addProperty("lsUsua", usuario);
-            soapObject.addProperty("lfLogi", lfLogi);
-            soapObject.addProperty("lfLati", lfLati);
-            soapObject.addProperty("liReco", liReco);
-
-
-            SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
-            envelope.dotNet = true;
-            envelope.setOutputSoapObject(soapObject);
-            HttpTransportSE transport = new HttpTransportSE(URL);
-            transport.call(SOAP_ACTION, envelope);
-            resultRequest = (SoapPrimitive) envelope.getResponse();
-            mensaje = "ok";
-            Log.i(TAG, "mensaje ok..");
-
-        } catch (Exception e) {
-            Log.i(TAG, "ERROR " + e.getMessage().toString());
-        }
-    }
-
-    /**
-     * Devuelve true si al menos un campo esta vacio.
-     * Devuelve false si todos los campos no estan vacios.
-     * @return
-     */
-    public boolean campos_vacios() {
-        return Funciones_auxiliares.vacia(this.edittxtusuario)
-                || Funciones_auxiliares.vacia(this.edittxtlinea)
-                || Funciones_auxiliares.vacia(this.edittxtplaca);
-
-    }
-
     private void ubicacion() {
         LocationManager mlocManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Localizacion Local = new Localizacion();
@@ -220,7 +128,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-
     public float getVelocidad(Location location){
         velocidad = 0;
         if(location == null){
@@ -232,13 +139,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return velocidad;
     }
-
-
-    @Override
-    public void onBackPressed(){
-
-    }
-
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == 1000) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -265,7 +165,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-    /* Aqui empieza la Clase Localizacion */
     public class Localizacion implements LocationListener {
         MainActivity mainActivity;
         public MainActivity getMainActivity() {
@@ -322,6 +221,73 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
         }
+    }
+
+    private void disabledButtonIniciarCaptura() {
+        Log.i(TAG,"btn inicar captura deshabilitado.");
+    }
+    private class TaskAddActividad extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            enviarActividad();
+            Log.i(TAG, "Datos enviados: " + linea + "  " + placa + " " + usuario);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            gotoMain2();
+        }
+    }
+
+    private void enableBottonIniciarCaptura() {
+    }
+
+    private void enviarActividad() {
+        String SOAP_ACTION = "http://activebs.net/RTACT_AdicionarActividad";
+        String METHOD_NAME = "RTACT_AdicionarActividad";
+        String NAME_SPACE = "http://activebs.net/";
+        String URL = "http://wslectura.coosiv.com/wsRT.asmx";
+
+        try {
+            SoapObject soapObject = new SoapObject(NAME_SPACE, METHOD_NAME);
+            soapObject.addProperty("liTipo", VarConst.ACTIVIDAD_INICIADA);
+            soapObject.addProperty("lsFech", lsFech);
+            soapObject.addProperty("lsHora", lsHora);
+            soapObject.addProperty("lsLine", linea);
+            soapObject.addProperty("lsPlac", placa);
+            soapObject.addProperty("lsUsua", usuario);
+            soapObject.addProperty("lfLogi", lfLogi);
+            soapObject.addProperty("lfLati", lfLati);
+            soapObject.addProperty("liReco", liReco);
+            SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+            envelope.dotNet = true;
+            envelope.setOutputSoapObject(soapObject);
+            HttpTransportSE transport = new HttpTransportSE(URL);
+            transport.call(SOAP_ACTION, envelope);
+            resultRequest = (SoapPrimitive) envelope.getResponse();
+            Log.i(TAG, "mensaje .."+resultRequest.toString());
+
+        } catch (Exception e) {
+            Log.i(TAG, "ERROR " + e.getMessage().toString());
+        }
+    }
+    public boolean campos_vacios() {
+        return Funciones_auxiliares.vacia(this.edittxtusuario)
+                || Funciones_auxiliares.vacia(this.edittxtlinea)
+                || Funciones_auxiliares.vacia(this.edittxtplaca);
+
+    }
+    private void gotoMain2() {
+
+        Intent intent = new Intent(this, Main2Activity.class);
+        startActivity(intent);
+        //finish();
+    }
+    @Override
+    public void onBackPressed(){
+
     }
 
 }

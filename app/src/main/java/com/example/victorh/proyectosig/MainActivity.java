@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
     }
     public void iniciarCaptura(View view) {
         if (!campos_vacios()) {
-            disabledButtonIniciarCaptura();
+            view.setEnabled(false);
             obtenerDatosCampos();
             obtenerOtrosDatos();
             TaskAddActividad taskAddActividad = new TaskAddActividad();
@@ -110,6 +110,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Algunos campos estan vacios", Toast.LENGTH_SHORT).show();
         }
     }
+
+
     private void ubicacion() {
         LocationManager mlocManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Localizacion Local = new Localizacion();
@@ -239,6 +241,18 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
             gotoMain2();
         }
+
+        @Override
+        protected void onCancelled() {
+            Button btn_iniciarCaptua=(Button)findViewById(R.id.btn_iniciar_captura);
+            btn_iniciarCaptua.setEnabled(true);
+            mostrarToastMensaje("No se puede registrar. Error en servidor.");
+            super.onCancelled();
+        }
+    }
+
+    private void mostrarToastMensaje(String s) {
+        Toast.makeText(this,s,Toast.LENGTH_SHORT).show();
     }
 
     private void enableBottonIniciarCaptura() {

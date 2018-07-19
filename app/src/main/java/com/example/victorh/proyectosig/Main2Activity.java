@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -28,21 +29,23 @@ public class Main2Activity extends AppCompatActivity implements Serializable{
 
     private String fecha = Funciones_auxiliares.getFecha();
     private String hora = Funciones_auxiliares.getHora();
-    private float velocidad = MainActivity.velocidad;
-    private double longitud = MainActivity.longitud;
-    private double latitud = MainActivity.latitud;
+    private float velocidad ;
+    private double longitud ;
+    private double latitud ;
     private final String TAG="main2";
     private Actividad actividadActual;
     private final int TIME_PERIOD=10000;
     private Timer timer;
     private TimerTask task;
 
+    private Button btn_pare,btn_grabar,btn_finCaptura;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
         inicializarVariables();
-        disableAllButton();
+        changeStateEnableAllButton(false);
         Log.i(TAG,velocidad + "km/h");
         Log.i(TAG,"latitud: " + latitud);
         Log.i(TAG,"longitud:" + longitud);
@@ -50,15 +53,21 @@ public class Main2Activity extends AppCompatActivity implements Serializable{
         TaskGetActividad taskGetActividad= new TaskGetActividad();
         taskGetActividad.execute();
     }
-    private void disableAllButton() {
-        //deshabilitar todos los botones
+    private void changeStateEnableAllButton(boolean b) {
+        this.btn_pare.setEnabled(b);
+        this.btn_grabar.setEnabled(b);
+        this.btn_finCaptura.setEnabled(b);
     }
     /**
      * Inicializa las variables que se van a utilizar
      */
     void inicializarVariables(){
-        this.edittxt_bajan=findViewById(R.id.edittxt_bajan);
-        this.edittxt_suben=findViewById(R.id.edittxt_suben);
+        btn_finCaptura=(Button)findViewById(R.id.btn_fin_captura);
+        btn_grabar=(Button)findViewById(R.id.btn_grabar);
+        btn_pare=(Button)findViewById(R.id.btn_pare);
+
+        this.edittxt_bajan=(EditText)findViewById(R.id.edittxt_bajan);
+        this.edittxt_suben=(EditText) findViewById(R.id.edittxt_suben);
     }
     /**
      * funcion del boton pare (btn_pare)
@@ -66,7 +75,7 @@ public class Main2Activity extends AppCompatActivity implements Serializable{
      * @param view
      */
     public void pare(View view) {
-
+        actualizarLocalizacion();
     }
     /**
      * funcion del boton Grabar (btn_grabar)
@@ -78,7 +87,7 @@ public class Main2Activity extends AppCompatActivity implements Serializable{
 
             String cantidaSubida=edittxt_suben.getText().toString();
             String cantidadBajada=edittxt_bajan.getText().toString();
-            disableButtonGrabar();
+            changeStateEnableButtonGrabar(false);
             TaskGrabar grabar= new TaskGrabar();
             grabar.execute(cantidaSubida,cantidadBajada);
 
@@ -86,8 +95,6 @@ public class Main2Activity extends AppCompatActivity implements Serializable{
         else{
             Toast.makeText(this,"Hay algunos campos vacios",Toast.LENGTH_SHORT).show();
         }
-    }
-    private void disableButtonGrabar() {
     }
     private class TaskGrabar extends AsyncTask<String,Void,Void> {
 
@@ -102,13 +109,16 @@ public class Main2Activity extends AppCompatActivity implements Serializable{
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            enabledButtonGrabar();
+            changeStateEnableButtonGrabar(true);
+            mostrarToastMensaje("Guardado...");
             super.onPostExecute(aVoid);
         }
     }
-    private void enabledButtonGrabar() {
 
+    private void changeStateEnableButtonGrabar(boolean b) {
+        this.btn_grabar.setEnabled(b);
     }
+
     /**
      * Devuelve true si existe al menos un campo vacio
      * Devuelve false si no ningun campo vacio
@@ -123,13 +133,12 @@ public class Main2Activity extends AppCompatActivity implements Serializable{
      * @param view
      */
     public void fin_captura(View view) {
-        //AQUI VA TU CODIGO
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Estas seguro de finalizar la captura?");
         builder.setPositiveButton(R.string.si, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 finalizaHilo();
-                disableAllButton();
+                changeStateEnableAllButton(false);
                 TaskSendActividadFinalizada finalizarActividad= new TaskSendActividadFinalizada();
                 finalizarActividad.execute();
             }
@@ -151,9 +160,6 @@ public class Main2Activity extends AppCompatActivity implements Serializable{
     }
     @Override
     public void onBackPressed(){
-    }
-    private void enabledAllButton() {
-        Log.i(TAG,"actividad recibida...habilitar los botones");
     }
     private void gotoMain() {
         Intent intent = new Intent(this, MainActivity.class);
@@ -198,6 +204,7 @@ public class Main2Activity extends AppCompatActivity implements Serializable{
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            mostrarToastMensaje("Recorrido Guardado. Ok");
             gotoMain();
             super.onPostExecute(aVoid);
         }
@@ -215,11 +222,12 @@ public class Main2Activity extends AppCompatActivity implements Serializable{
             if (actividadActual==null)
             {
                 Log.i(TAG,"no existe ultima actividad. gotoMain....");
+                mostrarToastMensaje("Error..");
                 gotoMain();
             }
             else
             {
-                enabledAllButton();
+                changeStateEnableAllButton(true);
                 lanzarHiloCadaXtiempo();
             }
             super.onPostExecute(aVoid);
@@ -283,12 +291,13 @@ public class Main2Activity extends AppCompatActivity implements Serializable{
         String METHOD_NAME="RTPRT_PuntosPasaMicro10Seg";
         String NAME_SPACE="http://activebs.net/";
         String URL="http://wslectura.coosiv.com/wsRT.asmx";
-
+        actualizarLocalizacion();
         try {
             SoapObject soapObject= new SoapObject(NAME_SPACE,METHOD_NAME);
             soapObject.addProperty("liNprt",1);//
             soapObject.addProperty("liNact",actividadActual.getIdActividad());
             soapObject.addProperty("lsHora",Funciones_auxiliares.getHora());
+
             soapObject.addProperty("lfLogi",this.longitud+"");
             soapObject.addProperty("lfLati",this.latitud+"");
             soapObject.addProperty("lfVelo",this.velocidad+"");
@@ -307,16 +316,25 @@ public class Main2Activity extends AppCompatActivity implements Serializable{
             Log.i(TAG,"ERROR RTPRT_PuntosPasaMicro10Seg"+e.getMessage().toString());
         }
     }
+
+    private void actualizarLocalizacion() {
+         velocidad = MainActivity.velocidad;
+         longitud = MainActivity.longitud;
+        latitud = MainActivity.latitud;
+    }
+
     private void enviarParadaMicro(String subida, String bajada) {
         String SOAP_ACTION="http://activebs.net/RTPPR_AdicionarPuntosPasaMicro";
         String METHOD_NAME="RTPPR_AdicionarPuntosPasaMicro";
         String NAME_SPACE="http://activebs.net/";
         String URL="http://wslectura.coosiv.com/wsRT.asmx";
+        actualizarLocalizacion();
 
         try {
             SoapObject soapObject= new SoapObject(NAME_SPACE,METHOD_NAME);
             soapObject.addProperty("liNact",actividadActual.getIdActividad());
             soapObject.addProperty("lsHora",Funciones_auxiliares.getHora());
+
             soapObject.addProperty("lfLogi",this.longitud+"");
             soapObject.addProperty("lfLati",this.latitud+"");
             soapObject.addProperty("liSube",subida);
@@ -341,7 +359,7 @@ public class Main2Activity extends AppCompatActivity implements Serializable{
         String METHOD_NAME="RTACT_AdicionarActividad";
         String NAME_SPACE="http://activebs.net/";
         String URL="http://wslectura.coosiv.com/wsRT.asmx";
-
+        actualizarLocalizacion();
         try {
             SoapObject soapObject= new SoapObject(NAME_SPACE,METHOD_NAME);
             soapObject.addProperty("liTipo",VarConst.ACTIVIDAD_FINALIZADA);
@@ -366,6 +384,9 @@ public class Main2Activity extends AppCompatActivity implements Serializable{
         {
             Log.i(TAG,"ERROR enviarActividad"+e.getMessage().toString());
         }
+    }
+    private void mostrarToastMensaje(String s) {
+        Toast.makeText(this,s,Toast.LENGTH_SHORT).show();
     }
 
 

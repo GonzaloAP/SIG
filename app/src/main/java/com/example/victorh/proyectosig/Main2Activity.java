@@ -12,11 +12,21 @@ public class Main2Activity extends AppCompatActivity {
 
     EditText edittxt_suben,edittxt_bajan;
 
+    private String fecha = Funciones_auxiliares.getFecha();
+    private String hora = Funciones_auxiliares.getHora();
+    private float velocidad = MainActivity.velocidad;
+    private double longitud = MainActivity.longitud;
+    private double latitud = MainActivity.latitud;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
         inicializarVariables();
+
+        System.out.println(velocidad + "km/h");
+        System.out.println("latitud: " + latitud);
+        System.out.println("longitud:" + longitud);
     }
 
     /**

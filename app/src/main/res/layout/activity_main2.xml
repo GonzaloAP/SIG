@@ -93,5 +93,16 @@
             android:onClick="fin_captura"
             android:paddingHorizontal="15dp"
             android:text="Fin Captura" />
+        <!--<Button
+            android:id="@+id/btn_detenerTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_gravity="center"
+            android:layout_marginTop="25dp"
+            android:background="@drawable/boton_redondo4"
+            android:onClick="detener"
+            android:paddingHorizontal="15dp"
+            android:text="detenerTimer" />-->
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

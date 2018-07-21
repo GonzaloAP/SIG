@@ -39,20 +39,21 @@ public class MainActivity extends AppCompatActivity {
     private String linea, placa, usuario;
     private String liTipo, lsFech, lsHora, lfLogi, lfLati, liReco;
     private SoapPrimitive resultRequest;
-    private final String TAG="main_act";
+    private final String TAG = "main_act";
     private String salidaRetorno;
-    private RadioButton rbsalida,rbretorno;
+    private RadioButton rbsalida, rbretorno;
     public static float velocidad;
     public static double latitud, longitud;
     private Actividad actividadActual;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        actividadActual=null;
+        actividadActual = null;
 
         Toast mensajeGPS = Toast.makeText(getApplicationContext(), "Por Favor Active su GPS", Toast.LENGTH_SHORT);
-        mensajeGPS.setGravity(Gravity.CENTER,0,0);
+        mensajeGPS.setGravity(Gravity.CENTER, 0, 0);
         mensajeGPS.show();
 
         iniciarVariable();
@@ -65,38 +66,39 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-
     private void obtenerDatosCampos() {
 
-        linea=edittxtlinea.getText().toString();
-        placa=edittxtplaca.getText().toString();
-        usuario=edittxtusuario.getText().toString();
+        linea = edittxtlinea.getText().toString();
+        placa = edittxtplaca.getText().toString();
+        usuario = edittxtusuario.getText().toString();
 
-        if (rbsalida.isChecked()) salidaRetorno= VarConst.RECORRIDO_SALIDA;
-        if (rbretorno.isChecked()) salidaRetorno= VarConst.RECORRIDO_RETORNO;
+        if (rbsalida.isChecked()) salidaRetorno = VarConst.RECORRIDO_SALIDA;
+        if (rbretorno.isChecked()) salidaRetorno = VarConst.RECORRIDO_RETORNO;
 
     }
+
     private void obtenerOtrosDatos() {
-        lsFech=Funciones_auxiliares.getFecha();
-        lsHora=Funciones_auxiliares.getHora();
-        lfLogi=this.longitud+"";
-        lfLati=this.latitud+"";
-        liReco=this.salidaRetorno;
+        lsFech = Funciones_auxiliares.getFecha();
+        lsHora = Funciones_auxiliares.getHora();
+        lfLogi = this.longitud + "";
+        lfLati = this.latitud + "";
+        liReco = this.salidaRetorno;
 
     }
-    public void iniciarVariable(){
-        edittxtusuario=(EditText) findViewById(R.id.edittxt_usuario);
-        edittxtplaca=(EditText) findViewById(R.id.edittxt_placa);
-        edittxtlinea=(EditText) findViewById(R.id.edittxt_linea);
+
+    public void iniciarVariable() {
+        edittxtusuario = (EditText) findViewById(R.id.edittxt_usuario);
+        edittxtplaca = (EditText) findViewById(R.id.edittxt_placa);
+        edittxtlinea = (EditText) findViewById(R.id.edittxt_linea);
         velocidad = 0;
         latitud = 0;
-        longitud=0;
-        rbsalida=(RadioButton)findViewById(R.id.rb_salida);
-        rbretorno=(RadioButton)findViewById(R.id.rb_retorno);
+        longitud = 0;
+        rbsalida = (RadioButton) findViewById(R.id.rb_salida);
+        rbretorno = (RadioButton) findViewById(R.id.rb_retorno);
 
 
     }
+
     public void iniciarCaptura(View view) {
         if (!campos_vacios()) {
             view.setEnabled(false);
@@ -130,17 +132,19 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-    public float getVelocidad(Location location){
+
+    public float getVelocidad(Location location) {
         velocidad = 0;
-        if(location == null){
+        if (location == null) {
             System.out.println(velocidad + " km/h ");
-        }else{
+        } else {
             velocidad = location.getSpeed();
-            velocidad= (float) (velocidad * (3.6));
+            velocidad = (float) (velocidad * (3.6));
             System.out.println(velocidad + " km/h ");
         }
         return velocidad;
     }
+
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == 1000) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -149,45 +153,47 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
     public void setLocation(Location loc) {
         //Obtener la direccion de la calle a partir de la latitud y la longitud
         if (loc.getLatitude() != 0.0 && loc.getLongitude() != 0.0) {
             try {
                 Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-                List<Address> list = geocoder.getFromLocation(
-                        loc.getLatitude(), loc.getLongitude(), 1);
+                List<Address> list = geocoder.getFromLocation(loc.getLatitude(), loc.getLongitude(), 1);
                 if (!list.isEmpty()) {
                     Address DirCalle = list.get(0);
 
-                    System.out.println("Mi direccion es: \n"
-                            + DirCalle.getAddressLine(0));
+                    System.out.println("Mi direccion es: \n" + DirCalle.getAddressLine(0));
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
+
     public class Localizacion implements LocationListener {
         MainActivity mainActivity;
+
         public MainActivity getMainActivity() {
             return mainActivity;
         }
+
         public void setMainActivity(MainActivity mainActivity) {
             this.mainActivity = mainActivity;
         }
+
         @Override
         public void onLocationChanged(Location loc) {
             // Este metodo se ejecuta cada vez que el GPS recibe nuevas coordenadas
             // debido a la deteccion de un cambio de ubicacion
 
-            if(loc == null){
+            if (loc == null) {
                 velocidad = 0;
-            }else{
+            } else {
                 velocidad = getVelocidad(loc);
                 latitud = loc.getLatitude();
                 longitud = loc.getLongitude();
-                String Text = "Mi ubicacion actual es: " + "\n Lat = "
-                        + loc.getLatitude() + "\n Long = " + loc.getLongitude();
+                String Text = "Mi ubicacion actual es: " + "\n Lat = " + loc.getLatitude() + "\n Long = " + loc.getLongitude();
                 System.out.println(Text);
                 System.out.println(velocidad + "km/h");
                 System.out.println("latitud: " + latitud);
@@ -195,20 +201,23 @@ public class MainActivity extends AppCompatActivity {
                 this.mainActivity.setLocation(loc);
             }
         }
+
         @Override
         public void onProviderDisabled(String provider) {
             // Este metodo se ejecuta cuando el GPS es desactivado
             Toast mensajeGPS = Toast.makeText(getApplicationContext(), "GPS Desactivado", Toast.LENGTH_SHORT);
-            mensajeGPS.setGravity(Gravity.CENTER,0,0);
+            mensajeGPS.setGravity(Gravity.CENTER, 0, 0);
             mensajeGPS.show();
         }
+
         @Override
         public void onProviderEnabled(String provider) {
             // Este metodo se ejecuta cuando el GPS es activado
             Toast mensajeGPS = Toast.makeText(getApplicationContext(), "GPS Activado", Toast.LENGTH_SHORT);
-            mensajeGPS.setGravity(Gravity.CENTER,0,0);
+            mensajeGPS.setGravity(Gravity.CENTER, 0, 0);
             mensajeGPS.show();
         }
+
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
             switch (status) {
@@ -225,15 +234,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void disabledButtonIniciarCaptura() {
-        Log.i(TAG,"btn inicar captura deshabilitado.");
-    }
     private class TaskAddActividad extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
             enviarActividad();
-            Log.i(TAG, "Datos enviados: " + linea + "  " + placa + " " + usuario);
             return null;
         }
 
@@ -244,18 +249,14 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onCancelled() {
-            Button btn_iniciarCaptua=(Button)findViewById(R.id.btn_iniciar_captura);
+            Button btn_iniciarCaptua = (Button) findViewById(R.id.btn_iniciar_captura);
             btn_iniciarCaptua.setEnabled(true);
             mostrarToastMensaje("No se puede registrar. Error en servidor.");
-            super.onCancelled();
         }
     }
 
     private void mostrarToastMensaje(String s) {
-        Toast.makeText(this,s,Toast.LENGTH_SHORT).show();
-    }
-
-    private void enableBottonIniciarCaptura() {
+        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
     }
 
     private void enviarActividad() {
@@ -281,27 +282,26 @@ public class MainActivity extends AppCompatActivity {
             HttpTransportSE transport = new HttpTransportSE(URL);
             transport.call(SOAP_ACTION, envelope);
             resultRequest = (SoapPrimitive) envelope.getResponse();
-            Log.i(TAG, "mensaje .."+resultRequest.toString());
+            printlog( "->>guardar Actividad " + resultRequest.toString()+" user:"+usuario+ " H:"+lsHora+ "F:"+lsFech);
 
         } catch (Exception e) {
-            Log.i(TAG, "ERROR " + e.getMessage().toString());
+            printlog( "->>guardar Actividad " +e.getMessage().toString());
         }
     }
+
+    private void printlog(String s) {
+        Log.i(TAG,s);
+    }
+
     public boolean campos_vacios() {
-        return Funciones_auxiliares.vacia(this.edittxtusuario)
-                || Funciones_auxiliares.vacia(this.edittxtlinea)
-                || Funciones_auxiliares.vacia(this.edittxtplaca);
+        return Funciones_auxiliares.vacia(this.edittxtusuario) || Funciones_auxiliares.vacia(this.edittxtlinea) || Funciones_auxiliares.vacia(this.edittxtplaca);
 
     }
-    private void gotoMain2() {
 
+    private void gotoMain2() {
         Intent intent = new Intent(this, Main2Activity.class);
         startActivity(intent);
-        //finish();
-    }
-    @Override
-    public void onBackPressed(){
-
+        finish();
     }
 
 }
